@@ -137,26 +137,26 @@
 • Contiene los servicios necesarios para ejecutar aplicaciones.
 
 <br/>
-<div style="text-align: justify"><h3><b> Kubelet </b></h3></div><br/>
+<div style="text-align: justify"><h3><b> Kubelet </b></h3></div>
 
 • Se comunica con el servidor API de Kubernetes.  
 • Se asegura de que los Pods y sus contenedores asociados se estén ejecutando.  
 • Reporta al plano de control sobre el estado de los Pods.
 
 <br/>
-<div style="text-align: justify"><h3><b> Container runtime </b></h3></div><br/>
+<div style="text-align: justify"><h3><b> Container runtime </b></h3></div>
 
 • Descarga imagens y ejecuta contenedores.  
 • Kubernetes implementa una interfaz para que este componente sea conectable.
 
 <br/>
-<div style="text-align: justify"><h3><b> Kubernetes proxy </b></h3></div><br/>
+<div style="text-align: justify"><h3><b> Kubernetes proxy </b></h3></div>
 
 • Proxy de red que se ejecuta en cada nodo de un clúster.  
 • Mantiene las reglas de red que permiten la comunicación con los Pods que se ejecutan en los Nodos.
 
 <br/>
-<div style="text-align: justify"><h3><b> Controllers </b></h3></div><br/>
+<div style="text-align: justify"><h3><b> Controllers </b></h3></div>
 
 • Monitorea el estado de un cluster.  
 • Toma medidas para asegurarse de que el estado real coincida con el estado deseado.  
@@ -187,8 +187,7 @@
 • El objetivo es que el estado deseado coincida con el estado actual.
 
 <br/>
-<div style="text-align: justify"><h3><b> Espacios de Nombre (Namespaces) </b></h3></div><br/>
-
+<div style="text-align: justify"><h3><b> Espacios de Nombre (Namespaces) </b></h3></div>
 • Virtualización de un clúster físico.  
 • Distinción de clústers por grupo, proyecto, etc.  
 • Proporcionar un ámbito para los nombres de los objetos.
@@ -199,7 +198,7 @@
 </p>
 
 <br/>
-<div style="text-align: justify"><h3><b> Nombres </b></h3></div><br/>
+<div style="text-align: justify"><h3><b> Nombres </b></h3></div>
 
 • Cada objeto tiene un nombre.  
 • Los nombres son únicos para un tipo de recurso dentro de un espacio de nombres.  
@@ -227,3 +226,92 @@
 <p align="center" >
   <img src="https://i.ibb.co/K70cx48/image.png" width="500" height="300" />
 </p>
+
+<br/>
+<div style="text-align: justify"><h2><b> Pods </b></h2></div>
+
+• Unidad deployable más simple en Kubernetes.  
+• Representa procesos que se ejecutan en un clúster.  
+• Encapsula un contenedor (o, a veces, varios).  
+• Replicar un pod sirve para escalar una aplicación horizontalmente
+
+- Sintaxis básica para deployar un Pod en Kubernetes.
+<p align="center" >
+  <img src="https://i.ibb.co/BGyZMps/image.png" width="275" height="275" />
+</p>
+
+<br/>
+<div style="text-align: justify"><h2><b> ReplicaSet </b></h2></div>
+
+• Mantiene un conjunto de Pods idénticos.  
+• La definición de un objeto ReplicaSet consiste en el número de replicas, plantilla para el Pod, y un selector para identificar qué Pods puede adquirir.  
+• Generalmente encapsulado por un objeto de implementación (Deployment object).
+
+
+- Sintaxis básica para deployar un ReplicaSet en Kubernetes.  
+<p align="center" >
+  <img src="https://i.ibb.co/Bn240S6/image.png" width="275" height="275" />
+</p>
+
+<br/>
+<div style="text-align: justify"><h2><b> Deployment </b></h2></div>
+
+• Proporciona actualizaciones para Pods y replicaSets.  
+• Ejecuta múltiples réplicas de una aplicación.  
+• Apto para aplicaciones sin estado.  
+• A diferencia de replicaSet, el objeto Deployment es más sólido y proporciona objetos adicionales.  
+• Otra diferencia entre un Deployment y una replicaSet es que en el primero una actualización desencadena un lanzamiento.
+
+- Sintaxis básica para un Deployment en Kubernetes.  
+<p align="center" >
+  <img src="https://i.ibb.co/XsWjMP9/image.png" width="275" height="275" />
+</p>
+
+<br/>
+<div style="text-align: justify"><h2><b> Kubectl  CLI </b></h2></div>
+
+• Herramienta clave para trabajar con Kubernetes.  
+• Proporcionar funcionalidad para trabajar con clústeres y cargas de trabajo que se ejecutan en clústeres.  
+• Varios tipos de comandos diferentes, incluidos declarativos e imperativos.
+
+<div style="text-align: justify"><h3><b> Comandos imperativos </b></h3></div>
+
+• Usados para crear, actualizar y eliminar objetos de Kubernetes rápidamente.  
+• Fáciles de aprender.  
+• No proporcione una pista de auditoría lo cual es importante y util al trabajar con clusters para saber que cambios se hacen.  
+• Los comandos no son flexibles, tienen opciones limitadas.
+
+Ejemplo:
+
+```bash
+  >   kubectl run nginx --image nginx
+```
+- Crear un Pod que ejecute un contenedor en especifico (En este caso nginx)
+
+<br/>
+<div style="text-align: justify"><h3><b> Configuración de objeto imperativa </b></h3></div>
+
+• Usa una plantilla de configuración.  
+• Especifique una operaciiones tales como crear, reemplazar o eliminar.
+
+Ejemplo:
+
+```bash
+  >   kubectl create -f nginx.yaml
+```
+<br/>
+<div style="text-align: justify"><h3><b> Comandos declarativos </b></h3></div>
+
+• La gestión declarativa de recursos es la forma de comandos más avanzada y poderosa disponible en Kubectl.  
+• Los archivos de configuración definen uno o más objetos.  
+• No se especifica ninguna operación.  
+• Las operaciones necesarias son inferidas por Kubectl.  
+• Funciona en archivos y directorios.  
+• Los archivos de configuración definen el estado deseado y Kubernetes actualiza ese estado.  
+•Método preferido para sistemas de producción.
+
+Ejemplo:
+
+```bash
+  >   kubectl apply -f nginx/
+```
