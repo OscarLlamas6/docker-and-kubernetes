@@ -315,3 +315,73 @@ Ejemplo:
 ```bash
   >   kubectl apply -f nginx/
 ```
+
+<br/>
+<div style="text-align: justify"><h2><b> Comandos en kubectl</b></h2></div>
+
+<br/>
+<div style="text-align: justify"><h3><b> Apply </b></h3></div>
+
+<div style="text-align: justify"> Gestiona aplicaciones a través de archivos que definen los recursos de Kubernetes. Crea y actualiza recursos en un clúster mediante la ejecución de kubectl apply. Esta es la forma recomendada de administrar aplicaciones de Kubernetes en producción. </div>
+
+Ejemplo:
+
+```bash
+  >   kubectl apply -f file.yaml
+```
+
+<br/>
+<div style="text-align: justify"><h2><b> Otros comandos</b></h2></div>
+
+```bash
+  # información del cluter
+kubectl cluster-info 
+
+# lista de los nodos del cluster
+kubectl get nodes  
+
+# lista de los servicios 
+kubectl get service 
+
+# lista de los pods
+kubectl get pods   
+
+# lista de deployments 
+kubectl get deployments 
+
+# lista de namespaces
+kubectl get namespaces 
+
+# lista de los pods del namespace prueba
+kubectl get pods -n prueba  
+
+# exponer un deployment
+kubectl expose deployment first-deployment --port=80 --type=NodePort 
+
+# información detallada del pod apache1 
+kubectl describe pod apache1  
+
+# eliminar servicio
+kubectl delete service hello-world  
+
+# eliminar deployment
+kubectl delete deployment hello-world  
+
+# escalar a 3 replicas un deployment
+kubectl scale --replicas=3 deployment prestashop -n prestashop
+
+# acceder al pod ubuntu-test  
+kubectl --namespace=enmilocalfunciona exec -it ubuntu-test bash  
+
+# crear un secret
+kubectl create secret generic mysql-pass --from-literal=password=mypassword 
+
+# aplicar el contenido del fichero deployment.yaml  
+kubectl apply -f deployment.yaml 
+
+# listar los tokens 
+kubeadm token list  
+
+# agregar nodo al cluster
+kubeadm join --discovery-token-unsafe-skip-ca-verification --token=102952.1a7dd4cc8d1f4cc5 172.17.0.52:6443
+```
