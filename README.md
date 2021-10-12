@@ -384,4 +384,17 @@ kubeadm token list
 
 # agregar nodo al cluster
 kubeadm join --discovery-token-unsafe-skip-ca-verification --token=102952.1a7dd4cc8d1f4cc5 172.17.0.52:6443
+
+# crear namespace
+kubectl create namespace <new_namespace_name>
+
+# eliminar objeto en fichero yaml
+kubectl delete -f <path of yaml file>
+
+# Cambiar de namespace
+kubectl config set-context --current --namespace=<namespace>
+
+# Escalar un deployment
+kubectl scale --replicas <number of replicas> deployment/<deployment name>
 ```
+
