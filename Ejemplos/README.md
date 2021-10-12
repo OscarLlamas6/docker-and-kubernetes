@@ -1,16 +1,14 @@
-# Introduction to Kubernetes
+# Introducion a Kubernetes
 
-Here's a simple Go API that returns the host's information. You can deploy the same container to any Kubernetes cluster. I use this guide to demo how to use Kubernetes locally, and then deploy the same app to AWS, GCP, and Azure.
-
-## Build Docker Image
+## Crear imagen Docker
 
 ```
-docker build -t christianhxc/api-hello .
-docker run -d -p 8080:8080 christianhxc/api-hello
-docker push christianhxc/api-hello
+docker build -t oscarllamas6/hello-golang:latest .
+docker run -d -p 8080:8080 oscarllamas6/hello-golang:latest
+docker push oscarllamas6/hello-golang:latest
 ```
 
-## Deploy Kubernetes Objects
+## Hacer deploy de objectos Kubernetes
 ```
 kubectl apply -f ./k8s/
 kubectl get all
