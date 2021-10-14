@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mongodb
+  name: test-app
   labels:
-    app: mongodb
+    app: test-app
 spec:
   containers:
-    - image: mongo:latest
-      name: mongodb-in-kubernetes
+    - image: nginx
+      name: test-container
       volumeMounts:
       - name:  host-volume
-        mountPath: "/data/db"
+        mountPath: "/usr/share/nginx/html"
   
   volumes:
     # - name:  empty-volume
@@ -23,18 +23,18 @@ spec:
 
     - name: host-volume
       hostPath:
-        path: /mongo/database
+        path: /home/docker/html
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo-service-kubernetes
+  name: nginx-service
 spec:
   type: NodePort
   selector:
-    app: mongdb
+    app: test-app
   ports:
   - protocol: TCP
-    port: 27017
-    targetPort: 27017
+    port: 80
+    targetPort: 80
