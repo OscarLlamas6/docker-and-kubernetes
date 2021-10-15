@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemonset-pods
+spec:
+  selector:
+    matchLabels:
+      name: daemonset-pods
+  template:
+    metadata:
+      labels:
+        name: daemonset-pods
+    spec:
+      containers:
+        - name: test1
+          image: nginx  
