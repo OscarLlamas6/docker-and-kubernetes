@@ -398,3 +398,297 @@ kubectl config set-context --current --namespace=<namespace>
 kubectl scale --replicas <number of replicas> deployment/<deployment name>
 ```
 
+# Manage Kubernetes applications
+
+<div style="text-align: justify"><h2><b> ReplicaSet </b></h2></div>
+
+• Replica de Pods para redundancia.  
+• Mantiene el estado deseado.  
+• Reemplaza al repliacontroller.  
+• Se crea automaticamente cuando se crea un nuevo deployment.  
+• Aunque se puede crear un replicaSet independientemente, se recomienda siempre crear un deployment.  
+
+<br>
+
+- Alterar el número de replicas en un deployment. (Escalar)
+
+```bash
+# Escalar un deployment
+> kubectl scale --replicas <number of replicas> deployment/<deployment name>
+```
+<div style="text-align: justify"><h2><b> Autoscaling </b></h2></div>
+
+- Horizontal Pod Autoscaler (HPA):
+  - Permite escalar hacia arriba y hacia abajo según sea necesario.  
+- Puede configurarse en base al estado deseado de CPU, memoria, etc.  
+- El master Pod analizara periódicamente las métricas de los Pods y realizará el escalado de ser necesario.  
+
+### ¿Cómo crear un Autoscaling en base a un replicaSet?
+
+```bash
+> kubectl autoscale deploy <deploy-name> --min=<min number of pods> --max=<max number of pods> --cpu-percent=<cpu percent desired>
+
+# Ejemplo
+> kubectl autoscale deploy hello-kubernetes --min=2 --max=6 --cpu-percent=18
+```
+
+- HPA from scratch
+
+```yaml
+# Autoscaling example
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello-kubernetes
+  namespace: default
+spec:
+ maxReplicas: 6
+ minReplicas: 2
+ scaleTargetRef:
+  apiVersion: apps/v1
+  kind: Deployment
+  name: hello-kubernetes
+ targetCPUUtilizationPercentage: 10
+```
+<div style="text-align: justify"><h2><b> Rolling updates </b></h2></div>
+
+- Como ya sabemos, los replicaSet y el Autoscaling son importantes para minimizar las interrupciones de un servicio.  
+- Las rolling updates son una forma de acumular cambios en las aplicaciones de forma automatizada y controlada en todos los pods.  
+- Permiten retroceder a un estado previo si algo sale mal.  
+
+
+## Habilitar rolling updates en una aplicación en Kubernetes.
+
+1.  Habilitar liveness y readines probes en los deployments para marcarlos como listos para tener rolling updates.
+
+```yaml
+# Liveness and readiness
+livenessProbe:
+  httpGet:
+    path: /
+    port: 9080
+  initialDelaySeconds: 300
+  periodSeconds: 15
+readinessProbe:
+  httpGet:
+    path: /
+    port: 9080
+  initialDelaySeconds: 45
+  periodSeconds: 15
+```
+2. Agregar estrategia de rolling updates en el YAML.
+
+```yaml
+# Deployment with rolling updates
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-hello-deployment
+  labels:
+    app: api-hello
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: api-hello
+  minReadySeconds: 5
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnaviable: 50%
+      maxSurge: 2
+  template:
+    metadata:
+      labels:
+        app: api-hello
+    spec:
+      containers:
+      - name: api-hello
+        image: docker.io/oscarllamas6/hello-golang:latest
+        ports:
+        - containerPort: 8080
+```
+
+## Seteando nueva imagen en deployment ejecutandose.
+
+```bash
+> kubectl set image deployments/<deployment name> <label name>=<new image registry name:tage>
+
+# Ejemplo
+> kubectl set image dpeloyments/hello-kubernetes hello-kubernetes=oscarllamas6/hello-kubernetes:2.0
+```
+## Verificar estado del rolling update
+
+```bash
+> kubectl rollout state deployment/<deployment name>
+```
+
+## Retroceder con rollout updates
+
+```bash
+> kubectl rollout undo deployments/<deployment name>
+```
+
+<div style="text-align: justify"><h2><b> ConfigMaps & Secrets </b></h2></div>
+
+- Se usan para proveer datos de configuracíón a los deployments.  
+- Pueden utilizarse en varios deployments.  
+- Los Secrets son utilizados para manejar información sensible.  
+- Diferentes maneras de crearlos:  
+  - Usando cadenas-
+  - Usando propiedades existentes o archivos "llave-valor"-
+  - Definiendo un ConfigMap en un archivo YAML.
+- Multiples maneras de referenciarlos desde un pod/deployment:
+  - Referencia como variable de entorno.
+  - Montar ConfigMap/Secret como un volumen.
+
+### Variables de entorno
+
+```bash
+# Variables de entorno en un deployment
+spec:
+  containers:
+  - name: grpc-kafka-client
+    image: docker.io/oscarllamas6/grpc-kafka-client:v1
+    env:
+      - name: KAFKA_CLIENT_NAME
+        value: ${KAFKA_CLIENT_NAME}
+      - name: KAFKA_SERVER_NAME
+        value: ${KAFKA_SERVER_NAME}
+    - containerPort: 3037
+```
+
+### ConfigMap string literal
+
+```bash
+# Crear ConfigMap string literal
+> kubectl create configmap app-config --from-literal=MESSAGE="This message"
+
+# Listar configmaps
+> kubectl get configmaps
+```
+
+- Utilizando configmap string literal creado previamente
+
+```yaml
+# Aplicando ConfigMap key en deployment
+spec:
+  containers:
+  - name: grpc-kafka-client
+    image: docker.io/oscarllamas6/grpc-kafka-client:v1
+    env:
+      - name: KAFKA_CLIENT_NAME
+        valueFrom:
+          configMapKeyRef:
+            name: app-config
+            key: MESSAGE
+```
+
+### ConfigMap properties file
+
+```bash
+# Leyendo archivo con pares de la forma <key>=<value>
+> cat my.properties
+MESSAGE="Hello from configmap file :D"
+
+# Crear ConfigMap desde un archivo
+> kubectl create configmap app-config --from-file=my.properties
+```
+- Utilizando configmap properties file creado previamente
+
+```yaml
+# Aplicando ConfigMap key en deployment
+spec:
+  containers:
+  - name: grpc-kafka-client
+    image: docker.io/oscarllamas6/grpc-kafka-client:v1
+    env:
+      - name: KAFKA_CLIENT_NAME
+        valueFrom:
+          configMapKeyRef:
+            name: app-config
+            key: my.properties
+```
+
+### ConfigMap from YAML
+
+```yaml
+# ConfigMap example
+apiVersion: v1
+data:
+  my.properties: MESSAGE=hello from yaml configmap
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: default
+```
+- Utilizando configmap con YAML creado previamente
+
+```yaml
+# Aplicando ConfigMap key en deployment
+spec:
+  containers:
+  - name: grpc-kafka-client
+    image: docker.io/oscarllamas6/grpc-kafka-client:v1
+    env:
+      - name: KAFKA_CLIENT_NAME
+        valueFrom:
+          configMapKeyRef:
+            name: app-config
+            key: my.properties
+```
+
+<div style="text-align: justify"><h2><b> Secrets </b></h2></div>
+
+- Crear un Secret string literal
+
+```bash
+# Crear Secret string literal
+> kubectl create secret generic app-config --from-literal=key=mySuperSecretAPIkey
+
+# Listar secrets
+> kubectl get secret
+```
+- Utilizando Secret string literal creado previamente
+
+```yaml
+# Aplicando ConfigMap key en deployment
+spec:
+  containers:
+  - name: grpc-kafka-client
+    image: docker.io/oscarllamas6/grpc-kafka-client:v1
+    env:
+      - name: KAFKA_CLIENT_NAME
+        valueFrom:
+          secretKeyRef:
+            name: app-config
+            key: key
+```
+
+- Usando Secrets con Volume mounts
+
+```bash
+# Crear Secret string literal
+> kubectl create secret generic app-config --from-literal=key=mySuperSecretAPIkey
+```
+- Creando un volume Mount con Secret creado previamente
+
+```yaml
+# Aplicando ConfigMap key en deployment
+spec:
+  containers:
+  - name: grpc-kafka-client
+    image: docker.io/oscarllamas6/grpc-kafka-client:v1
+    ports:
+      - containerPort: 8080
+    volumeMounts:
+      - name: api-config
+        mountPath: "/etc/api"
+        readOnly: true
+    volumes:
+      - name: api-config
+      secret:
+        secretName: api-config
+```
+
