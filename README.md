@@ -521,7 +521,7 @@ spec:
 ## Verificar estado del rolling update
 
 ```bash
-> kubectl rollout state deployment/<deployment name>
+> kubectl rollout status deployment/<deployment name>
 ```
 
 ## Retroceder con rollout updates
